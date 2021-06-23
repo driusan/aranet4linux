@@ -1,0 +1,24 @@
+#!/bin/sh
+
+dst="${out:-./bin}";
+
+while test $# -gt 0; do
+  case "$1" in
+    --prefix*)
+        echo 'prefix';
+        dst=`echo $1/bin | sed -e 's/^[^=]*=//g'`
+        shift;
+    esac
+done
+
+cat > Makefile <<MAKEFILE
+DESTDIR ?= $dst
+aranet4: main.c
+	\$(CC) -o aranet4 -Wall -Wextra -pedantic -Wmissing-prototypes -Wstrict-prototypes     -Wold-style-definition `pkg-config --cflags --static --libs dbus-1` main.c
+
+clean:
+	rm -f aranet4 *.o
+
+install: aranet4
+	mkdir -p \${DESTDIR}&& cp aranet4 \${DESTDIR}
+MAKEFILE
